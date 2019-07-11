@@ -5,7 +5,7 @@ import (
 	"context"
 	"log"
 	
-	"github.com/opencensus-go-exporter-azuremonitor/azuremonitor"
+	"github.com/ChrisCoe/opencensus-go-exporter-azuremonitor/azuremonitor"
 	"go.opencensus.io/trace"
 )
 

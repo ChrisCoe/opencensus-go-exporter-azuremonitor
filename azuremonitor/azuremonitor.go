@@ -6,8 +6,8 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/opencensus-go-exporter-azuremonitor/azuremonitor/common"
-	"github.com/opencensus-go-exporter-azuremonitor/azuremonitor/utils"
+	"github.com/ChrisCoe/opencensus-go-exporter-azuremonitor/azuremonitor/common"
+	"github.com/ChrisCoe/opencensus-go-exporter-azuremonitor/azuremonitor/utils"
 	"go.opencensus.io/trace"
 )
 
