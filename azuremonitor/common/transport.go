@@ -19,6 +19,7 @@ type Transporter struct {
 	@return The exporter created, and error if there is any
 */
 func (e *Transporter) Transmit(options *Options, envelope *Envelope) {
+	fmt.Println("CALLED my transmit")
 	bytesRepresentation, err := json.Marshal(envelope)
 	if err != nil {
 		fmt.Println(err)

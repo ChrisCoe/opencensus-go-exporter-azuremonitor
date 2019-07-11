@@ -21,6 +21,7 @@ type AzureTraceExporter struct {
 	@return The exporter created and error if there is any
 */
 func NewAzureTraceExporter(IKey string) (*AzureTraceExporter, error) {
+	fmt.Println("CALLED NewAzureTraceExporter")
 	if IKey == "" {
 		return nil, errors.New("missing Instrumentation Key for Azure Exporter")
 	}
@@ -43,6 +44,7 @@ var _ trace.Exporter = (*AzureTraceExporter)(nil)
 	@param sd Span data retrieved by opencensus
 */
 func (exporter *AzureTraceExporter) ExportSpan(sd *trace.SpanData) {
+	fmt.Println("CALLED MY EXPORTSPAN")
 	envelope := common.Envelope {
 		IKey : exporter.Options.InstrumentationKey,
 		Tags : common.AzureMonitorContext,
