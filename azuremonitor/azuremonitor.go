@@ -21,6 +21,7 @@ type AzureTraceExporter struct {
 	@return The exporter created and error if there is any
 */
 func NewAzureTraceExporter(Options common.Options) (*AzureTraceExporter, error) {
+	fmt.Println("Called NewAzureTraceExporter with Options")
 	if Options.InstrumentationKey == "" {
 		return nil, errors.New("missing Instrumentation Key for Azure Exporter")
 	}
