@@ -13,6 +13,8 @@ import (
 
 type AzureTraceExporter struct {
 	InstrumentationKey string
+	EndPoint		   string
+	TimeOut            int
 	Options            common.Options
 }
 
@@ -33,8 +35,11 @@ func NewAzureTraceExporter(Options common.Options) (*AzureTraceExporter, error) 
 	}
 	exporter := &AzureTraceExporter {
 		Options:            Options,
+		InstrumentationKey: Options.InstrumentationKey,
+		EndPoint:           Options.EndPoint,
+		TimeOut:            Options.TimeOut,
 	}
-	
+
 	return exporter, nil
 }
 
