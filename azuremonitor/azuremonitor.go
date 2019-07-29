@@ -1,4 +1,5 @@
 package azuremonitor
+
 // Package: extension for exporters to Azure Monitor.
 // This includes examples on how to create azure exporters to send spans.
 
@@ -13,7 +14,7 @@ import (
 
 type AzureTraceExporter struct {
 	InstrumentationKey string
-	EndPoint		   string
+	EndPoint           string
 	TimeOut            int
 	Options            common.Options
 }
@@ -33,7 +34,7 @@ func NewAzureTraceExporter(Options common.Options) (*AzureTraceExporter, error) 
 	if Options.TimeOut == 0 {
 		Options.TimeOut = 10.0
 	}
-	exporter := &AzureTraceExporter {
+	exporter := &AzureTraceExporter{
 		Options:            Options,
 		InstrumentationKey: Options.InstrumentationKey,
 		EndPoint:           Options.EndPoint,
@@ -50,24 +51,24 @@ var _ trace.Exporter = (*AzureTraceExporter)(nil)
 */
 func (exporter *AzureTraceExporter) ExportSpan(sd *trace.SpanData) {
 	fmt.Println("CALLED MY EXPORTSPAN")
-	envelope := common.Envelope {
-		IKey : exporter.Options.InstrumentationKey,
-		Tags : common.AzureMonitorContext,
-		Time : utils.FormatTime(sd.StartTime),
+	envelope := common.Envelope{
+		IKey: exporter.Options.InstrumentationKey,
+		Tags: common.AzureMonitorContext,
+		Time: utils.FormatTime(sd.StartTime),
 	}
 
 	envelope.Tags["ai.operation.id"] = sd.SpanContext.TraceID.String()
 	if sd.ParentSpanID.String() != "0000000000000000" {
-		envelope.Tags["ai.operation.parentId"] = "|" + sd.SpanContext.TraceID.String() + 
-												 "." + sd.ParentSpanID.String()
+		envelope.Tags["ai.operation.parentId"] = "|" + sd.SpanContext.TraceID.String() +
+			"." + sd.ParentSpanID.String()
 	}
 	if sd.SpanKind == trace.SpanKindServer {
 		envelope.Name = "Microsoft.ApplicationInsights.Request"
 		currentData := common.Request{
-			Id : "|" + sd.SpanContext.TraceID.String() + "." + sd.SpanID.String() + ".",
-			Duration : utils.TimeStampToDuration(sd.EndTime.Sub(sd.StartTime)),
-			ResponseCode : "0",
-			Success : true,
+			Id:           "|" + sd.SpanContext.TraceID.String() + "." + sd.SpanID.String() + ".",
+			Duration:     utils.TimeStampToDuration(sd.EndTime.Sub(sd.StartTime)),
+			ResponseCode: "0",
+			Success:      true,
 		}
 		if _, isIncluded := sd.Attributes["http.method"]; isIncluded {
 			currentData.Name = fmt.Sprintf("%s", sd.Attributes["http.method"])
@@ -79,20 +80,20 @@ func (exporter *AzureTraceExporter) ExportSpan(sd *trace.SpanData) {
 		if _, isIncluded := sd.Attributes["http.status_code"]; isIncluded {
 			currentData.ResponseCode = fmt.Sprintf("%d", sd.Attributes["http.status_code"])
 		}
-		envelope.DataToSend = common.Data {
-			BaseData : currentData,
-			BaseType : "RequestData",
+		envelope.DataToSend = common.Data{
+			BaseData: currentData,
+			BaseType: "RequestData",
 		}
 
 	} else {
 		envelope.Name = "Microsoft.ApplicationInsights.RemoteDependency"
 		currentData := common.RemoteDependency{
-			Name : sd.Name,
-			Id : "|" + sd.SpanContext.TraceID.String() + "." + sd.SpanID.String() + ".",
-			ResultCode : "0", // TODO: Out of scope for now
-			Duration : utils.TimeStampToDuration(sd.EndTime.Sub(sd.StartTime)),
-			Success : true,
-			Ver : 2,
+			Name:       sd.Name,
+			Id:         "|" + sd.SpanContext.TraceID.String() + "." + sd.SpanID.String() + ".",
+			ResultCode: "0", // TODO: Out of scope for now
+			Duration:   utils.TimeStampToDuration(sd.EndTime.Sub(sd.StartTime)),
+			Success:    true,
+			Ver:        2,
 		}
 		if sd.SpanKind == trace.SpanKindClient {
 			currentData.Type = "HTTP"
@@ -104,18 +105,18 @@ func (exporter *AzureTraceExporter) ExportSpan(sd *trace.SpanData) {
 				currentData.ResultCode = fmt.Sprintf("%d", sd.Attributes["http.status_code"])
 			}
 		} else {
-			currentData.Type = "INPROC" 
+			currentData.Type = "INPROC"
 		}
-		envelope.DataToSend = common.Data {
-			BaseData : currentData,
-			BaseType : "RemoteDependencyData",
+		envelope.DataToSend = common.Data{
+			BaseData: currentData,
+			BaseType: "RemoteDependencyData",
 		}
 	}
-	transporter := common.Transporter{ 
+	transporter := common.Transporter{
 		EnvelopeData: envelope,
 	}
 	transporter.Transmit(&exporter.Options, &envelope)
 
-	fmt.Printf("Name: %s\nTraceID: %x\nSpanID: %x\nParentSpanID: %x\nStartTime: %s\nEndTime: %s\nAnnotations: %+v\n\n",
+	fmt.Printf("Name: %s\nTraceID: %s\nSpanID: %s\nParentSpanID: %s\nStartTime: %s\nEndTime: %s\nAnnotations: %+v\n\n",
 		sd.Name, sd.TraceID, sd.SpanID, sd.ParentSpanID, sd.StartTime, sd.EndTime, sd.Annotations)
 }
